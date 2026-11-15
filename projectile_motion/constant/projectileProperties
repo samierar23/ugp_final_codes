@@ -1,0 +1,21 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+  =========                 |
+  \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
+   \\    /   O peration     | Version:  v2512
+    \\  /    A nd           | Website:  www.openfoam.com
+     \\/     M anipulation  |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    object      projectileProperties;
+}
+
+v0          100;                // launch speed [m/s]
+phi0        45;                 // launch angle [deg]
+gGround     (0 -9.81 0);        // gravity in the ground frame [m/s^2]
+rc          (0.0125 0.025 0);            // centre of rotation [m]
+
+// ************************************************************************* //
