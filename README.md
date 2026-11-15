@@ -1,6 +1,8 @@
-# Fuze Cell Multiphase Simulation using OpenFOAM (interFoam)
+# Fuze Cell Simulation using OpenFOAM
 
-This repository contains the OpenFOAM case setups and a modified solver used to study the fluid behaviour inside a **fuze cell** under (a) constant gravity and (b) time-varying gravity experienced during projectile motion.
+This repository contains the OpenFOAM case setups and a modified solver used to study the fluid behaviour inside a **fuze cell** under 
+(a) constant gravity and 
+(b) time-varying gravity experienced during projectile motion.
 
 The work uses the Volume-of-Fluid (VOF) based **`interFoam`** solver for two-phase, incompressible, isothermal flow, along with a custom-modified version of it that supports a varying gravitational acceleration **g**.
 
@@ -24,11 +26,10 @@ Source code of the **modified `interFoam` solver**. The modification allows the 
 
 Main files typically include:
 - `myInterFoam.C` – main solver file
-- `createFields.H` – field and variable definitions (including the varying g)
+- `createFields.H` – field and variable definitions
+- `updateGravity.H` – varying g is calculated and updated
 - `UEqn.H`, `alphaEqn.H`, `pEqn.H` – momentum, phase-fraction and pressure equations
 - `Make/files`, `Make/options` – compilation configuration
-
-> Update this list to match the exact files in the folder.
 
 ### 3. `projectile_motion/`
 Complete case setup (`0/`, `constant/`, `system/`) for the fuze cell under **varying g**, run with the modified solver from `myInterFoam-modified_solver`. It represents the loading experienced by the fuze cell during projectile motion.
@@ -49,8 +50,9 @@ Complete case setup (`0/`, `constant/`, `system/`) for the fuze cell under **var
 
 ```bash
 cd fixed_rotating
-blockMesh            # or the mesh utility used for this case
-setFields            # initialise the phase fraction (if used)
+blockMesh            # to setup the mesh
+topoSet              # to define the porous regions
+setFields            # initialise the phase fraction 
 interFoam            # run the solver
 ```
 
@@ -69,6 +71,7 @@ wmake
 ```bash
 cd ../projectile_motion
 blockMesh
+topoSet
 setFields
 myInterFoam          # name of the compiled executable (check Make/files)
 ```
@@ -88,8 +91,6 @@ The two setups allow comparison of:
 - Pressure and velocity fields
 - Effect of varying g versus constant g on fluid motion
 
-*(Add result images, plots or observations here.)*
-
 ---
 
 ## Notes
@@ -100,10 +101,3 @@ The two setups allow comparison of:
 
 ---
 
-## Author
-
-*Your name / institution / contact*
-
-## License
-
-*Add a license if you plan to share this publicly (e.g. GPL, since OpenFOAM is GPL-licensed).*
