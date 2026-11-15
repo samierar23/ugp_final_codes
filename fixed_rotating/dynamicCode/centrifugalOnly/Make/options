@@ -1,0 +1,16 @@
+/* dynamicCode:
+ * SHA1 = 1246ee7854bbd15a17cddb67cd76863ecf39bcf4
+ */
+EXE_INC = -g \
+-I$(LIB_SRC)/finiteVolume/lnInclude \
+-I$(LIB_SRC)/fvOptions/lnInclude \
+-I$(LIB_SRC)/meshTools/lnInclude \
+-I$(LIB_SRC)/sampling/lnInclude \
+
+
+LIB_LIBS = \
+    -lfiniteVolume \
+    -lfvOptions \
+    -lmeshTools \
+    -lsampling \
+

@@ -1,0 +1,1 @@
+LIB = $(PWD)/../platforms/$(WM_OPTIONS)/lib/libcapillaryRetention_6b7a79372165b0f738cd6579c11a0bb2a673e0e2

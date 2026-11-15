@@ -1,0 +1,174 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+  =========                 |
+  \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
+   \\    /   O peration     | Version:  v2512
+    \\  /    A nd           | Website:  www.openfoam.com
+     \\/     M anipulation  |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    object      fvOptions;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+porosity1
+{
+    type            explicitPorositySource;
+    active          true;
+
+    explicitPorositySourceCoeffs
+    {
+        selectionMode   cellZone;
+        cellZone        porousZones;
+
+        type            DarcyForchheimer;
+
+        DarcyForchheimerCoeffs
+        {
+            d   (1e15 1e15 0);    // Viscous resistance coefficient (m^-2)
+            f   (0 0 0);          // Inertial resistance coefficient
+            coordinateSystem
+            {
+                type    cartesian;
+                origin  (0 0 0);
+                e1      (1 0 0);
+                e2      (0 1 0);
+            }
+        }
+    }
+}
+
+rotatingFrameSource
+{
+    type            vectorCodedSource;
+    active          true;
+    name            centrifugalOnly;
+
+    vectorCodedSourceCoeffs
+    {
+        selectionMode   all;
+        fields          (U);
+
+        codeInclude
+        #{
+            #include "fvCFD.H"
+        #};
+
+        codeCorrect
+        #{
+            // not used
+        #};
+
+        codeAddSup
+        #{
+            // not called - rho-weighted overload used instead
+        #};
+
+        codeAddSupRho
+        #{
+            const fvMesh& mesh = this->mesh();
+
+            const scalar omega = 1570.8;
+            const vector origin(0.0125, 0, 0);
+            const vector axis(0, 1, 0);
+            const vector Om = omega*axis;
+
+            volVectorField F
+            (
+        	IOobject("centrifugalForce", mesh.time().timeName(), mesh),
+        	mesh,
+        	dimensionedVector(dimForce/dimVolume, Zero)
+    	    );
+
+            for (const label celli : this->cells())
+            {
+                const vector r = mesh.C()[celli] - origin;
+                const vector centrifugal = -(Om ^ (Om ^ r));
+                F[celli] += rho[celli]*centrifugal;
+            }
+
+            eqn += F;
+
+        #};
+
+        codeConstrain
+        #{
+            // not used
+        #};
+    }
+}
+
+capillarySource
+{
+    type            vectorCodedSource;
+    active          true;
+    name            capillaryRetention;
+    vectorCodedSourceCoeffs
+    {
+        selectionMode   cellZone;
+        cellZone        porousZones;
+        fields          (U);
+
+        // Parameters are read by the code below
+        rPore           1e-8;      // m
+        sigma           0.032;     // N/m
+        contactAngleDeg 60;        // wetting
+
+        codeInclude
+        #{
+            #include "fvCFD.H"
+        #};
+
+        codeCorrect
+        #{
+        #};
+
+        codeAddSup
+        #{
+        #};
+
+        codeAddSupRho
+        #{
+            const fvMesh& mesh = this->mesh();
+            const dictionary& c = this->coeffs();
+
+            const volScalarField& alpha =
+                mesh.lookupObject<volScalarField>("alpha.electrolyte");
+
+            const scalar rPore  = c.get<scalar>("rPore");
+            const scalar sigma  = c.get<scalar>("sigma");
+            const scalar theta  =
+                c.get<scalar>("contactAngleDeg")
+               *constant::mathematical::pi/180.0;
+
+            const scalar Pc = 2.0*sigma*Foam::cos(theta)/rPore;
+
+            const volVectorField gradAlpha(fvc::grad(alpha));
+
+            volVectorField F
+            (
+                IOobject("capillaryForce", mesh.time().timeName(), mesh),
+                mesh,
+                dimensionedVector(dimForce/dimVolume, Zero)
+            );
+
+            for (const label celli : this->cells())
+            {
+                F[celli] = -Pc*gradAlpha[celli];
+            }
+
+            // "+=" adds a physical source on the right-hand side, independent
+            // of the sign convention of eqn.source()
+            eqn += F;
+        #};
+
+        codeConstrain
+        #{
+        #};
+    }
+}
+
+// ************************************************************************* //
