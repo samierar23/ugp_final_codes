@@ -36,14 +36,6 @@ Complete case setup (`0/`, `constant/`, `system/`) for the fuze cell under **var
 
 ---
 
-## Requirements
-
-- Linux (or WSL on Windows)
-- OpenFOAM (specify version, e.g. OpenFOAM-v2012 / OpenFOAM-9)
-- A working OpenFOAM environment sourced in the terminal
-
----
-
 ## Usage
 
 ### A. Constant g case (standard interFoam)
